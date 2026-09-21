@@ -8,11 +8,11 @@ function randomColor() {
   return { r: randomChannel(), g: randomChannel(), b: randomChannel() }
 }
 
-export function useGame() {
+export function useGame(mode) {
   const [round, setRound] = useState(1)
   const [target, setTarget] = useState(() => randomColor())
   const [history, setHistory] = useState([])
-  const [status, setStatus] = useState('playing') // 'playing' | 'success'
+  const [status, setStatus] = useState('playing') // 'playing' | 'success' | 'result'
   const [elapsed, setElapsed] = useState(0)
   const startRef = useRef(Date.now())
 
@@ -29,15 +29,22 @@ export function useGame() {
       if (status !== 'playing') return
       const correct =
         guess.r === target.r && guess.g === target.g && guess.b === target.b
+      const finalElapsed = (Date.now() - startRef.current) / 1000
 
       setHistory((h) => [...h, { ...guess, correct }])
 
+      if (mode === 'oldChicken') {
+        setElapsed(finalElapsed)
+        setStatus('result')
+        return
+      }
+
       if (correct) {
-        setElapsed((Date.now() - startRef.current) / 1000)
+        setElapsed(finalElapsed)
         setStatus('success')
       }
     },
-    [status, target],
+    [status, target, mode],
   )
 
   const nextLevel = useCallback(() => {
