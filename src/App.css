@@ -373,6 +373,76 @@
   font-variant-numeric: tabular-nums;
 }
 
+.nickname-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.nickname-form input {
+  width: 100%;
+  font-size: 18px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  text-align: center;
+}
+
+.set-comment {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 20px;
+}
+
+.rank-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.rank-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.rank-table th,
+.rank-table td {
+  padding: 6px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+
+.rank-table th:first-child,
+.rank-table td:first-child,
+.rank-table th:nth-child(2),
+.rank-table td:nth-child(2) {
+  text-align: left;
+}
+
+.rank-table th {
+  color: var(--text-dim);
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rank-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rank-table tr.rank-row-self td {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 @media (max-width: 400px) {
   .rgb-form input {
     width: 64px;

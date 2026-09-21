@@ -4,13 +4,19 @@ import { GameScreen } from './components/GameScreen'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState(null) // null | 'oldChicken' | 'infinite'
+  const [session, setSession] = useState(null) // null | { mode, nickname }
 
-  if (!mode) {
-    return <MainMenu onSelectMode={setMode} />
+  if (!session) {
+    return <MainMenu onStart={(mode, nickname) => setSession({ mode, nickname })} />
   }
 
-  return <GameScreen mode={mode} onExit={() => setMode(null)} />
+  return (
+    <GameScreen
+      mode={session.mode}
+      nickname={session.nickname}
+      onExit={() => setSession(null)}
+    />
+  )
 }
 
 export default App

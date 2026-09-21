@@ -1,13 +1,8 @@
-import { rgbToHex } from '../utils/color'
+import { matchPercent as computeMatchPercent, rgbDistance, rgbToHex } from '../utils/color'
 
-const MAX_DISTANCE = Math.sqrt(3 * 255 ** 2)
-
-export function ResultStats({ guess, target, elapsed, onNext, onHome, children }) {
-  const dR = Math.abs(guess.r - target.r)
-  const dG = Math.abs(guess.g - target.g)
-  const dB = Math.abs(guess.b - target.b)
-  const distance = Math.sqrt(dR ** 2 + dG ** 2 + dB ** 2)
-  const matchPercent = Math.round((1 - distance / MAX_DISTANCE) * 100)
+export function ResultStats({ guess, target, elapsed, onNext, onHome, nextLabel = '下一關', children }) {
+  const distance = rgbDistance(guess, target)
+  const percent = computeMatchPercent(distance)
   const isExact = distance === 0
 
   return (
@@ -28,7 +23,7 @@ export function ResultStats({ guess, target, elapsed, onNext, onHome, children }
       <div className="result-grid">
         <div className="result-stat">
           <span>相似度</span>
-          <strong>{matchPercent}%</strong>
+          <strong>{percent}%</strong>
         </div>
         <div className="result-stat">
           <span>座標距離</span>
@@ -44,7 +39,7 @@ export function ResultStats({ guess, target, elapsed, onNext, onHome, children }
 
       <div className="result-actions">
         <button type="button" onClick={onNext}>
-          下一關
+          {nextLabel}
         </button>
         <button type="button" className="secondary" onClick={onHome}>
           回主頁

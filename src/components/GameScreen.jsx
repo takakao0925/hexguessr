@@ -1,10 +1,13 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useGame } from '../hooks/useGame'
+import { rgbDistance } from '../utils/color'
+import { addRankingEntry, computeSetTotals } from '../utils/rankings'
 import { ColorTarget } from './ColorTarget'
 import { RGBInputForm } from './RGBInputForm'
 import { GuessHistory } from './GuessHistory'
 import { SuccessBanner } from './SuccessBanner'
 import { ResultStats } from './ResultStats'
+import { SetSummary } from './SetSummary'
 
 const ColorSpace3D = lazy(() =>
   import('./ColorSpace3D').then((m) => ({ default: m.ColorSpace3D })),
@@ -15,12 +18,44 @@ const MODE_LABEL = {
   infinite: '無限逼近',
 }
 
-export function GameScreen({ mode, onExit }) {
+const SET_SIZE = 10
+
+export function GameScreen({ mode, nickname, onExit }) {
   const { round, target, history, status, elapsed, submitGuess, nextLevel } = useGame(mode)
+  const [setResults, setSetResults] = useState([])
+  const [setSummary, setSetSummary] = useState(null)
 
   const lastGuess = history[history.length - 1]
   const showSpace = mode === 'infinite' && status === 'playing' && history.length > 0
   const roundKey = `${mode}-${target.r}-${target.g}-${target.b}`
+  const isLastInSet = setResults.length + 1 >= SET_SIZE
+
+  const handleResultNext = () => {
+    if (mode !== 'oldChicken' || !lastGuess) {
+      nextLevel()
+      return
+    }
+
+    const distance = rgbDistance(lastGuess, target)
+    const updated = [...setResults, { distance, elapsed }]
+    setSetResults(updated)
+
+    if (updated.length >= SET_SIZE) {
+      const totals = computeSetTotals(updated)
+      const savedAt = Date.now()
+      const rankings = addRankingEntry({ id: nickname, timestamp: savedAt, ...totals })
+      setSetSummary({ totals, rankings, savedAt })
+      return
+    }
+
+    nextLevel()
+  }
+
+  const handleContinueAfterSummary = () => {
+    setSetResults([])
+    setSetSummary(null)
+    nextLevel()
+  }
 
   return (
     <div className="app">
@@ -37,33 +72,53 @@ export function GameScreen({ mode, onExit }) {
       <main className="app-main">
         {mode === 'infinite' && status === 'playing' && <GuessHistory history={history} />}
 
-        <ColorTarget color={target} />
-
-        {status === 'success' && (
-          <SuccessBanner
-            target={target}
-            elapsed={elapsed}
-            attempts={history.length}
-            onNext={nextLevel}
+        {setSummary ? (
+          <SetSummary
+            totals={setSummary.totals}
+            rankings={setSummary.rankings}
+            nickname={nickname}
+            savedAt={setSummary.savedAt}
+            onContinue={handleContinueAfterSummary}
             onHome={onExit}
           />
-        )}
-
-        {status === 'result' && lastGuess && (
-          <ResultStats guess={lastGuess} target={target} elapsed={elapsed} onNext={nextLevel} onHome={onExit}>
-            <Suspense fallback={<div className="color-space-loading">載入 3D 場景中…</div>}>
-              <ColorSpace3D guess={lastGuess} target={target} />
-            </Suspense>
-          </ResultStats>
-        )}
-
-        {status === 'playing' && (
+        ) : (
           <>
-            <RGBInputForm key={roundKey} onSubmit={submitGuess} />
-            {showSpace && lastGuess && (
-              <Suspense fallback={<div className="color-space-loading">載入 3D 場景中…</div>}>
-                <ColorSpace3D guess={lastGuess} target={target} />
-              </Suspense>
+            <ColorTarget color={target} />
+
+            {status === 'success' && (
+              <SuccessBanner
+                target={target}
+                elapsed={elapsed}
+                attempts={history.length}
+                onNext={nextLevel}
+                onHome={onExit}
+              />
+            )}
+
+            {status === 'result' && lastGuess && (
+              <ResultStats
+                guess={lastGuess}
+                target={target}
+                elapsed={elapsed}
+                onNext={handleResultNext}
+                onHome={onExit}
+                nextLabel={mode === 'oldChicken' && isLastInSet ? '查看總結算' : '下一關'}
+              >
+                <Suspense fallback={<div className="color-space-loading">載入 3D 場景中…</div>}>
+                  <ColorSpace3D guess={lastGuess} target={target} />
+                </Suspense>
+              </ResultStats>
+            )}
+
+            {status === 'playing' && (
+              <>
+                <RGBInputForm key={roundKey} onSubmit={submitGuess} />
+                {showSpace && lastGuess && (
+                  <Suspense fallback={<div className="color-space-loading">載入 3D 場景中…</div>}>
+                    <ColorSpace3D guess={lastGuess} target={target} />
+                  </Suspense>
+                )}
+              </>
             )}
           </>
         )}
