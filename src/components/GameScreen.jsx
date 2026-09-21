@@ -8,6 +8,7 @@ import { GuessHistory } from './GuessHistory'
 import { SuccessBanner } from './SuccessBanner'
 import { ResultStats } from './ResultStats'
 import { SetSummary } from './SetSummary'
+import { RankBoard } from './RankBoard'
 
 const ColorSpace3D = lazy(() =>
   import('./ColorSpace3D').then((m) => ({ default: m.ColorSpace3D })),
@@ -24,6 +25,7 @@ export function GameScreen({ mode, nickname, onExit }) {
   const { round, target, history, status, elapsed, submitGuess, nextLevel } = useGame(mode)
   const [setResults, setSetResults] = useState([])
   const [setSummary, setSetSummary] = useState(null)
+  const [summaryPage, setSummaryPage] = useState('summary') // 'summary' | 'rank'
 
   const lastGuess = history[history.length - 1]
   const showSpace = mode === 'infinite' && status === 'playing' && history.length > 0
@@ -37,7 +39,7 @@ export function GameScreen({ mode, nickname, onExit }) {
     }
 
     const distance = rgbDistance(lastGuess, target)
-    const updated = [...setResults, { distance, elapsed }]
+    const updated = [...setResults, { guess: lastGuess, target, distance, elapsed }]
     setSetResults(updated)
 
     if (updated.length >= SET_SIZE) {
@@ -45,6 +47,7 @@ export function GameScreen({ mode, nickname, onExit }) {
       const savedAt = Date.now()
       const rankings = addRankingEntry({ id: nickname, timestamp: savedAt, ...totals })
       setSetSummary({ totals, rankings, savedAt })
+      setSummaryPage('summary')
       return
     }
 
@@ -54,6 +57,7 @@ export function GameScreen({ mode, nickname, onExit }) {
   const handleContinueAfterSummary = () => {
     setSetResults([])
     setSetSummary(null)
+    setSummaryPage('summary')
     nextLevel()
   }
 
@@ -72,16 +76,26 @@ export function GameScreen({ mode, nickname, onExit }) {
       <main className="app-main">
         {mode === 'infinite' && status === 'playing' && <GuessHistory history={history} />}
 
-        {setSummary ? (
+        {setSummary && summaryPage === 'summary' && (
           <SetSummary
+            results={setResults}
             totals={setSummary.totals}
+            onViewRank={() => setSummaryPage('rank')}
+            onHome={onExit}
+          />
+        )}
+
+        {setSummary && summaryPage === 'rank' && (
+          <RankBoard
             rankings={setSummary.rankings}
             nickname={nickname}
             savedAt={setSummary.savedAt}
             onContinue={handleContinueAfterSummary}
             onHome={onExit}
           />
-        ) : (
+        )}
+
+        {!setSummary && (
           <>
             <ColorTarget color={target} />
 

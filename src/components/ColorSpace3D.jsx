@@ -77,6 +77,7 @@ export function ColorSpace3D({ guess, target }) {
           dampingFactor={0.12}
           minDistance={4}
           maxDistance={16}
+          target={[AXIS_LENGTH / 2, AXIS_LENGTH / 2, AXIS_LENGTH / 2]}
         />
       </Canvas>
       <div className="color-space-legend">

@@ -1,6 +1,9 @@
 import { rgbToHex } from '../utils/color'
+import { useEnterKey } from '../hooks/useEnterKey'
 
 export function SuccessBanner({ target, elapsed, attempts, onNext, onHome }) {
+  useEnterKey(onNext)
+
   return (
     <div className="success-banner">
       <h2>答對了！</h2>

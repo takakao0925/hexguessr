@@ -62,7 +62,7 @@ export function addRankingEntry({ id, totalDistance, totalTime, avgDistance, avg
   }
   const rankings = getRankings()
   rankings.push(entry)
-  rankings.sort((a, b) => a.avgDistance - b.avgDistance || a.avgTime - b.avgTime)
+  rankings.sort((a, b) => a.totalDistance - b.totalDistance || a.totalTime - b.totalTime)
   const trimmed = rankings.slice(0, MAX_ENTRIES)
   writeJSON(RANKINGS_KEY, trimmed)
   return trimmed

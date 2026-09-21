@@ -1,9 +1,12 @@
 import { matchPercent as computeMatchPercent, rgbDistance, rgbToHex } from '../utils/color'
+import { useEnterKey } from '../hooks/useEnterKey'
 
 export function ResultStats({ guess, target, elapsed, onNext, onHome, nextLabel = '下一關', children }) {
   const distance = rgbDistance(guess, target)
   const percent = computeMatchPercent(distance)
   const isExact = distance === 0
+
+  useEnterKey(onNext)
 
   return (
     <div className="result-stats">
