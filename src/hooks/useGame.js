@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { track } from '../utils/analytics'
 
 function randomChannel() {
   return Math.floor(Math.random() * 256)
@@ -33,18 +34,28 @@ export function useGame(mode) {
 
       setHistory((h) => [...h, { ...guess, correct }])
 
+      const attempts = history.length + 1
+      const stats = {
+        mode,
+        round,
+        attempts,
+        seconds: Math.round(finalElapsed),
+      }
+
       if (mode === 'oldChicken') {
+        track('game_result', { ...stats, correct })
         setElapsed(finalElapsed)
         setStatus('result')
         return
       }
 
       if (correct) {
+        track('level_success', stats)
         setElapsed(finalElapsed)
         setStatus('success')
       }
     },
-    [status, target, mode],
+    [status, target, mode, history.length, round],
   )
 
   const nextLevel = useCallback(() => {
