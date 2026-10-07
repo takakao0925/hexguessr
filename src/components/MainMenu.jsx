@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { loadNickname, saveNickname } from '../utils/rankings'
+import { trackEvent } from '../utils/analytics'
 
 export function MainMenu({ onStart }) {
   const [askingNickname, setAskingNickname] = useState(false)
@@ -10,6 +11,7 @@ export function MainMenu({ onStart }) {
       event.preventDefault()
       const trimmed = nickname.trim() || '玩家'
       saveNickname(trimmed)
+      trackEvent('game_start', { mode: 'oldChicken' })
       onStart('oldChicken', trimmed)
     }
 
@@ -49,7 +51,10 @@ export function MainMenu({ onStart }) {
           <p>每關只有一次作答機會，送出後直接看結算：座標距離、花費秒數、R/G/B 各軸差距。每 10 關結算一次總成績，並列入排行榜。</p>
         </button>
 
-        <button type="button" className="mode-card" onClick={() => onStart('infinite')}>
+        <button type="button" className="mode-card" onClick={() => {
+            trackEvent('game_start', { mode: 'infinite' })
+            onStart('infinite')
+          }}>
           <h2>無限逼近</h2>
           <p>答錯會進入 3D 座標空間看自己跟正確答案的位置，可以無限次嘗試直到答對。</p>
         </button>

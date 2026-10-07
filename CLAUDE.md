@@ -37,6 +37,14 @@ Hexguessr，一款色碼猜測遊戲（"色碼遊戲"）。玩家看到一個目
 - `src/hooks/useGame.js` — 遊戲核心狀態機；`useEnterKey.js` — Enter 鍵送出的輔助 hook
 - `src/utils/color.js` — 色彩換算；`rankings.js` — 分數/段位邏輯；`comment.js` — 猜測回饋文字產生
 
+## 埋點追蹤（GTM / GA4）
+
+- `index.html` 內嵌 GTM（容器 `GTM-T39QJJS2`）；遊戲用 `src/utils/analytics.js` 的 `trackEvent` 把事件推進 `window.dataLayer`，再由 GTM 的自訂事件觸發條件轉成 GA4 事件。
+- `game_start`（`MainMenu.jsx`）：`mode`
+- `level_success`（`useGame.js`，無限逼近猜中）：`mode`、`round`、`attempts`、`seconds`（整數秒）
+- `game_result`（`useGame.js`，老雞模式出結果）：`mode`、`round`、`attempts`（固定 1）、`seconds`、`correct`（誤差 = 距離 ÷ 黑白對角線 < 30%，常數 `ONE_SHOT_CORRECT_ERROR_RATIO`）
+- `mode` 的值為 `oldChicken` / `infinite`。
+
 ## 功能開發歷程（git log，新到舊）
 
 1. Add more to total score

@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { MAX_RGB_DISTANCE, rgbDistance } from '../utils/color'
+import { trackEvent } from '../utils/analytics'
+
+const ONE_SHOT_CORRECT_ERROR_RATIO = 0.3
 
 function randomChannel() {
   return Math.floor(Math.random() * 256)
@@ -36,15 +40,28 @@ export function useGame(mode) {
       if (mode === 'oldChicken') {
         setElapsed(finalElapsed)
         setStatus('result')
+        trackEvent('game_result', {
+          mode,
+          round,
+          attempts: 1,
+          seconds: Math.round(finalElapsed),
+          correct: rgbDistance(guess, target) / MAX_RGB_DISTANCE < ONE_SHOT_CORRECT_ERROR_RATIO,
+        })
         return
       }
 
       if (correct) {
         setElapsed(finalElapsed)
         setStatus('success')
+        trackEvent('level_success', {
+          mode,
+          round,
+          attempts: history.length + 1,
+          seconds: Math.round(finalElapsed),
+        })
       }
     },
-    [status, target, mode],
+    [status, target, mode, round, history.length],
   )
 
   const nextLevel = useCallback(() => {
