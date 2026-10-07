@@ -21,7 +21,8 @@ Hexguessr，一款色碼猜測遊戲（"色碼遊戲"）。玩家看到一個目
 
 這個專案是在 macOS 上開發的，有一個地雷：
 
-- `啟動遊戲.command` 是 **macOS 專屬** 的雙擊啟動腳本（bash + `open` 指令開瀏覽器），**在 Windows 上不能用**。Windows 上請直接用 `npm run dev`，或請 Claude 另外做一個 `.bat` / `.ps1` 的等效版本。
+- `啟動遊戲.command` 是 **macOS 專屬** 的雙擊啟動腳本（bash + `open` 指令開瀏覽器），**在 Windows 上不能用**（雙擊會被當純文字檔打開）。
+- Windows 上請改用同目錄下的 `啟動遊戲.bat`（雙擊即可：開發伺服器 + 3 秒後自動開瀏覽器到 `http://localhost:5173`），或直接下指令 `npm run dev`。
 
 ## 部署
 
