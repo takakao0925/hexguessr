@@ -5,7 +5,7 @@ echo Starting Hexguessr dev server...
 start "Hexguessr Dev Server" cmd /k npm run dev
 
 timeout /t 3 /nobreak >nul
-start "" "http://localhost:5173"
+start "" "http://localhost:5173/hexguessr/"
 
 echo.
 echo Game opened in your browser.

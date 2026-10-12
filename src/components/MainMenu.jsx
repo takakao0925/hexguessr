@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { loadNickname, saveNickname } from '../utils/rankings'
 import { trackEvent } from '../utils/analytics'
+import { getMemberXp, levelInfo } from '../utils/membership'
 
 export function MainMenu({ onStart }) {
   const [askingNickname, setAskingNickname] = useState(false)
@@ -11,14 +12,22 @@ export function MainMenu({ onStart }) {
       event.preventDefault()
       const trimmed = nickname.trim() || '玩家'
       saveNickname(trimmed)
-      trackEvent('game_start', { mode: 'oldChicken' })
+      trackEvent('game_start', {
+        mode: 'oldChicken',
+        member_level: levelInfo(getMemberXp(trimmed)).level,
+      })
       onStart('oldChicken', trimmed)
     }
+
+    const { level, xpInLevel } = levelInfo(getMemberXp(nickname.trim() || '玩家'))
 
     return (
       <div className="main-menu">
         <h1>老雞模式</h1>
         <p className="menu-subtitle">輸入你的暱稱</p>
+        <p className="menu-subtitle">
+          Lv.{level}（{xpInLevel} / 100 XP）
+        </p>
         <form className="nickname-form" onSubmit={handleSubmit}>
           <input
             type="text"

@@ -1,7 +1,8 @@
 import { matchPercent as computeMatchPercent, rgbDistance, rgbToHex } from '../utils/color'
 import { useEnterKey } from '../hooks/useEnterKey'
+import { XpBar } from './XpBar'
 
-export function ResultStats({ guess, target, elapsed, onNext, onHome, nextLabel = '下一關', children }) {
+export function ResultStats({ guess, target, elapsed, xpGain, onNext, onHome, nextLabel = '下一關', children }) {
   const distance = rgbDistance(guess, target)
   const percent = computeMatchPercent(distance)
   const isExact = distance === 0
@@ -37,6 +38,8 @@ export function ResultStats({ guess, target, elapsed, onNext, onHome, nextLabel 
           <strong>{elapsed.toFixed(1)}s</strong>
         </div>
       </div>
+
+      {xpGain && <XpBar xpGain={xpGain} />}
 
       {children}
 

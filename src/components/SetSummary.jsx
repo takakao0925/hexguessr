@@ -1,6 +1,7 @@
 import { matchPercent, rgbToHex } from '../utils/color'
 import { getSetComment } from '../utils/comment'
 import { useEnterKey } from '../hooks/useEnterKey'
+import { levelInfo } from '../utils/membership'
 
 function ColorCell({ rgb }) {
   return (
@@ -11,8 +12,10 @@ function ColorCell({ rgb }) {
   )
 }
 
-export function SetSummary({ results, totals, onViewRank, onHome }) {
+export function SetSummary({ results, totals, memberXp, onViewRank, onHome }) {
   const { totalDistance, totalTime, avgDistance, avgTime } = totals
+  const xpEarned = results.reduce((sum, r) => sum + (r.xp ?? 0), 0)
+  const { level, xpInLevel } = levelInfo(memberXp)
   const comment = getSetComment(avgDistance)
   const avgSimilarity = matchPercent(avgDistance)
 
@@ -44,6 +47,17 @@ export function SetSummary({ results, totals, onViewRank, onHome }) {
           <span>總時間</span>
           <strong>{totalTime.toFixed(1)}s</strong>
         </div>
+      </div>
+
+      <div className="xp-bar">
+        <div className="xp-bar-head">
+          <strong>Lv.{level}</strong>
+          <span>本輪 +{xpEarned} XP</span>
+        </div>
+        <div className="xp-bar-track">
+          <div className="xp-bar-fill" style={{ width: `${xpInLevel}%` }} />
+        </div>
+        <div className="xp-bar-foot">{xpInLevel} / 100 XP</div>
       </div>
 
       <div className="compare-table-wrap">

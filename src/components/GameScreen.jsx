@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 import { useGame } from '../hooks/useGame'
 import { rgbDistance } from '../utils/color'
 import { addRankingEntry, computeSetTotals } from '../utils/rankings'
+import { getMemberXp, levelInfo } from '../utils/membership'
 import { ColorTarget } from './ColorTarget'
 import { RGBInputForm } from './RGBInputForm'
 import { GuessHistory } from './GuessHistory'
@@ -22,11 +23,15 @@ const MODE_LABEL = {
 const SET_SIZE = 10
 
 export function GameScreen({ mode, nickname, onExit }) {
-  const { round, target, history, status, elapsed, submitGuess, nextLevel } = useGame(mode)
+  const { round, target, history, status, elapsed, xpGain, submitGuess, nextLevel } = useGame(
+    mode,
+    nickname,
+  )
   const [setResults, setSetResults] = useState([])
   const [setSummary, setSetSummary] = useState(null)
   const [summaryPage, setSummaryPage] = useState('summary') // 'summary' | 'rank'
 
+  const memberLevel = levelInfo(xpGain ? xpGain.newXp : getMemberXp(nickname))
   const lastGuess = history[history.length - 1]
   const showSpace = mode === 'infinite' && status === 'playing' && history.length > 0
   const roundKey = `${mode}-${target.r}-${target.g}-${target.b}`
@@ -39,7 +44,10 @@ export function GameScreen({ mode, nickname, onExit }) {
     }
 
     const distance = rgbDistance(lastGuess, target)
-    const updated = [...setResults, { guess: lastGuess, target, distance, elapsed }]
+    const updated = [
+      ...setResults,
+      { guess: lastGuess, target, distance, elapsed, xp: xpGain?.gained ?? 0 },
+    ]
     setSetResults(updated)
 
     if (updated.length >= SET_SIZE) {
@@ -71,7 +79,10 @@ export function GameScreen({ mode, nickname, onExit }) {
         <div className="timer">{elapsed.toFixed(1)}s</div>
       </header>
 
-      <div className="mode-tag">{MODE_LABEL[mode]}</div>
+      <div className="mode-tag">
+        {MODE_LABEL[mode]}
+        {mode === 'oldChicken' && ` · Lv.${memberLevel.level} · ${memberLevel.xpInLevel}/100 XP`}
+      </div>
 
       <main className="app-main">
         {mode === 'infinite' && status === 'playing' && <GuessHistory history={history} />}
@@ -80,6 +91,7 @@ export function GameScreen({ mode, nickname, onExit }) {
           <SetSummary
             results={setResults}
             totals={setSummary.totals}
+            memberXp={getMemberXp(nickname)}
             onViewRank={() => setSummaryPage('rank')}
             onHome={onExit}
           />
@@ -114,6 +126,7 @@ export function GameScreen({ mode, nickname, onExit }) {
                 guess={lastGuess}
                 target={target}
                 elapsed={elapsed}
+                xpGain={xpGain}
                 onNext={handleResultNext}
                 onHome={onExit}
                 nextLabel={mode === 'oldChicken' && isLastInSet ? '查看總結算' : '下一關'}

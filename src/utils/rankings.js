@@ -2,7 +2,7 @@ const RANKINGS_KEY = 'hexguessr:oldChickenRankings'
 const NICKNAME_KEY = 'hexguessr:nickname'
 const MAX_ENTRIES = 10
 
-function readJSON(key, fallback) {
+export function readJSON(key, fallback) {
   try {
     const raw = localStorage.getItem(key)
     return raw ? JSON.parse(raw) : fallback
@@ -11,7 +11,7 @@ function readJSON(key, fallback) {
   }
 }
 
-function writeJSON(key, value) {
+export function writeJSON(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {

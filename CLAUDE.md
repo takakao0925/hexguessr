@@ -22,7 +22,11 @@ Hexguessr，一款色碼猜測遊戲（"色碼遊戲"）。玩家看到一個目
 這個專案是在 macOS 上開發的，有一個地雷：
 
 - `啟動遊戲.command` 是 **macOS 專屬** 的雙擊啟動腳本（bash + `open` 指令開瀏覽器），**在 Windows 上不能用**（雙擊會被當純文字檔打開）。
-- Windows 上請改用同目錄下的 `啟動遊戲.bat`（雙擊即可：開發伺服器 + 3 秒後自動開瀏覽器到 `http://localhost:5173`），或直接下指令 `npm run dev`。
+- Windows 上請改用同目錄下的 `啟動遊戲.bat`（雙擊即可：開發伺服器 + 3 秒後自動開瀏覽器到 `http://localhost:5173/hexguessr/`，注意結尾的 `/hexguessr/` 是 `base` 設定造成的，漏掉會打不開），或直接下指令 `npm run dev`。
+
+## 換機器後的依賴安裝
+
+- `node_modules` 含平台專屬原生執行檔（例如 rolldown 的 `@rolldown/binding-*`），**不能跨作業系統複製**。換機器或換系統後請在新機器上執行 `npm ci`（會自己清掉舊的 `node_modules` 再依 lockfile 重裝）。
 
 ## 部署
 
@@ -40,10 +44,17 @@ Hexguessr，一款色碼猜測遊戲（"色碼遊戲"）。玩家看到一個目
 ## 埋點追蹤（GTM / GA4）
 
 - `index.html` 內嵌 GTM（容器 `GTM-T39QJJS2`）；遊戲用 `src/utils/analytics.js` 的 `trackEvent` 把事件推進 `window.dataLayer`，再由 GTM 的自訂事件觸發條件轉成 GA4 事件。
-- `game_start`（`MainMenu.jsx`）：`mode`
+- `game_start`（`MainMenu.jsx`）：`mode`；老雞模式另帶 `member_level`
 - `level_success`（`useGame.js`，無限逼近猜中）：`mode`、`round`、`attempts`、`seconds`（整數秒）
-- `game_result`（`useGame.js`，老雞模式出結果）：`mode`、`round`、`attempts`（固定 1）、`seconds`、`correct`（誤差 = 距離 ÷ 黑白對角線 < 30%，常數 `ONE_SHOT_CORRECT_ERROR_RATIO`）
+- `game_result`（`useGame.js`，老雞模式出結果）：`mode`、`round`、`attempts`（固定 1）、`seconds`、`correct`（誤差 = 距離 ÷ 黑白對角線 < 30%，常數 `ONE_SHOT_CORRECT_ERROR_RATIO`）、`similarity`、`xp_earned`、`total_xp`、`member_level`
+- `member_level_up`（`useGame.js`，升級當下）：`prev_level`、`new_level`、`total_xp`
 - `mode` 的值為 `oldChicken` / `infinite`。
+
+## 會員等級 / 經驗值
+
+- 只有老雞模式計經驗值，以暱稱當玩家身分，存在 localStorage（`hexguessr:members`），只在同一裝置同一瀏覽器累積。
+- 每關 XP = `round(33 × (相似度/100)²)`（`src/utils/membership.js` 的 `xpForSimilarity`），上限 33；每 100 XP 升一級，無等級上限。
+- 結算畫面的經驗值條在 `XpBar.jsx`。
 
 ## 功能開發歷程（git log，新到舊）
 
